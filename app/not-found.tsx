@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function NotFound() {
   return (
@@ -11,7 +11,8 @@ export default function NotFound() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <p className="text-muted-foreground">
-            The page you’re looking for doesn’t exist. You can create it now with a unique URL slug.
+            The page you’re looking for doesn’t exist. You can create it now
+            with a unique URL slug.
           </p>
           <div className="flex justify-center">
             <Button asChild>
@@ -21,5 +22,5 @@ export default function NotFound() {
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }

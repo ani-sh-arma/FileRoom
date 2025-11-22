@@ -1,9 +1,9 @@
-import { neon } from "@neondatabase/serverless"
+import { neon } from "@neondatabase/serverless";
 
-type Sql = ReturnType<typeof neon>
+type Sql = ReturnType<typeof neon>;
 
-let _sql: Sql | null = null
-let _schemaReady = false
+let _sql: Sql | null = null;
+let _schemaReady = false;
 
 function getDatabaseUrl() {
   const candidates = [
@@ -12,25 +12,25 @@ function getDatabaseUrl() {
     process.env.POSTGRES_PRISMA_URL,
     process.env.POSTGRES_URL_NON_POOLING,
     process.env.POSTGRES_URL_NO_SSL,
-  ].filter(Boolean) as string[]
+  ].filter(Boolean) as string[];
   if (candidates.length === 0) {
     throw new Error(
-      "DATABASE_URL not found. Ensure Neon is connected or set one of: DATABASE_URL, POSTGRES_URL, POSTGRES_PRISMA_URL, POSTGRES_URL_NON_POOLING, POSTGRES_URL_NO_SSL.",
-    )
+      "DATABASE_URL not found. Ensure Neon is connected or set one of: DATABASE_URL, POSTGRES_URL, POSTGRES_PRISMA_URL, POSTGRES_URL_NON_POOLING, POSTGRES_URL_NO_SSL."
+    );
   }
-  return candidates[0]
+  return candidates[0];
 }
 
 export function sql(): Sql {
-  if (_sql) return _sql
-  const url = getDatabaseUrl()
-  _sql = neon(url)
-  return _sql!
+  if (_sql) return _sql;
+  const url = getDatabaseUrl();
+  _sql = neon(url);
+  return _sql!;
 }
 
 export async function ensureSchema() {
-  if (_schemaReady) return
-  const s = sql()
+  if (_schemaReady) return;
+  const s = sql();
   // Rooms table
   await s`
     create table if not exists rooms (
@@ -40,7 +40,7 @@ export async function ensureSchema() {
       password_hash text,
       created_at timestamptz not null default now()
     );
-  `
+  `;
   // Files table
   await s`
     create table if not exists files (
@@ -52,15 +52,20 @@ export async function ensureSchema() {
       size bigint,
       created_at timestamptz not null default now()
     );
-  `
-  await s`create index if not exists files_room_idx on files(room_id);`
-  _schemaReady = true
+  `;
+  await s`create index if not exists files_room_idx on files(room_id);`;
+  _schemaReady = true;
 }
 
 export async function findRoomBySlug(slug: string) {
-  const s = sql()
-  const rows = await s<{ id: number; slug: string; is_private: boolean; password_hash: string | null }>`
+  const s = sql();
+  const rows = await s<{
+    id: number;
+    slug: string;
+    is_private: boolean;
+    password_hash: string | null;
+  }>`
     select id, slug, is_private, password_hash from rooms where slug = ${slug} limit 1
-  `
-  return rows[0] || null
+  `;
+  return rows[0] || null;
 }

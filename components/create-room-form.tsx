@@ -1,76 +1,91 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useState } from "react";
+import useSWRMutation from "swr/mutation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
-import { useState } from "react"
-import useSWRMutation from "swr/mutation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
-async function createRoomReq(url: string, { arg }: { arg: { slug: string; is_private: boolean; password?: string } }) {
+async function createRoomReq(
+  url: string,
+  { arg }: { arg: { slug: string; is_private: boolean; password?: string } }
+) {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(arg),
-  })
+  });
+
   if (!res.ok) {
     // Try to extract a meaningful message
-    let t = ""
+    let t = "";
     try {
-      t = await res.text()
+      t = await res.text();
     } catch {}
     const message =
-      t || (res.status === 500 ? "Server error while creating the room. Please try again." : "Failed to create room")
-    throw new Error(message)
+      t ||
+      (res.status === 500
+        ? "Server error while creating the room. Please try again."
+        : "Failed to create room");
+    throw new Error(message);
   }
-  return res.json()
+  return res.json();
 }
 
 export default function CreateRoomForm() {
-  const [slug, setSlug] = useState("")
-  const [isPrivate, setIsPrivate] = useState(false)
-  const [password, setPassword] = useState("")
-  const { trigger, isMutating } = useSWRMutation("/api/rooms", createRoomReq)
+  const [slug, setSlug] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [password, setPassword] = useState("");
+  const { trigger, isMutating } = useSWRMutation("/api/rooms", createRoomReq);
 
   const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     const cleanSlug = slug
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, "-")
       .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "")
-    if (!cleanSlug) return alert("Please enter a valid slug")
-    if (isPrivate && password.length < 4) return alert("Password must be at least 4 characters")
+      .replace(/^-|-$/g, "");
+    if (!cleanSlug) return alert("Please enter a valid slug");
+    if (isPrivate && password.length < 4)
+      return alert("Password must be at least 4 characters");
 
     try {
       const data = await trigger({
         slug: cleanSlug,
         is_private: isPrivate,
         password: isPrivate ? password : undefined,
-      })
+      });
       if (data?.room?.slug) {
-        window.location.href = `/${data.room.slug}`
+        window.location.href = `/${data.room.slug}`;
       } else {
-        alert("Room created but no slug returned. Please navigate manually.")
-        console.log("[v0] createRoom unexpected response:", data)
+        alert("Room created but no slug returned. Please navigate manually.");
+        console.log("[v0] createRoom unexpected response:", data);
       }
     } catch (err: any) {
-      const message = err?.message || "Failed to create room"
-      alert(message)
-      console.log("[v0] createRoom error:", message)
+      const message = err?.message || "Failed to create room";
+      alert(message);
+      console.log("[v0] createRoom error:", message);
     }
-  }
+  };
 
   return (
     <Card className="max-w-xl w-full mx-auto">
       <CardHeader>
         <CardTitle className="text-balance">Create a File Room</CardTitle>
         <CardDescription className="text-pretty">
-          Pick a unique page URL where anyone can view and upload files. Optionally set a password.
+          Pick a unique page URL where anyone can view and upload files.
+          Optionally set a password.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -92,9 +107,15 @@ export default function CreateRoomForm() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
               <Label htmlFor="privacy">Make page private</Label>
-              <span className="text-sm text-muted-foreground">Requires a password to access</span>
+              <span className="text-sm text-muted-foreground">
+                Requires a password to access
+              </span>
             </div>
-            <Switch id="privacy" checked={isPrivate} onCheckedChange={setIsPrivate} />
+            <Switch
+              id="privacy"
+              checked={isPrivate}
+              onCheckedChange={setIsPrivate}
+            />
           </div>
 
           {isPrivate && (
@@ -116,5 +137,5 @@ export default function CreateRoomForm() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
