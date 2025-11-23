@@ -29,7 +29,7 @@ export async function POST(
     return new NextResponse("No file provided", { status: 400 });
   }
 
-  const { url } = await put(`rooms/${slug}/${file.name}`, file as any, {
+  const { url } = await put(`rooms/${slug}/${file.name}`, file, {
     access: "public",
     addRandomSuffix: true,
   });
@@ -38,8 +38,8 @@ export async function POST(
     room_slug: slug,
     file_name: file.name,
     blob_url: url,
-    size: (file as any).size ?? 0,
-    content_type: (file as any).type ?? null,
+    size: file.size,
+    content_type: file.type,
   });
 
   return NextResponse.json({ file: saved });

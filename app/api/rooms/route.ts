@@ -31,8 +31,8 @@ export async function POST(req: Request) {
     const room = await createRoom({ slug, is_private, password_hash });
     console.log("[v0] rooms: created", { id: room.id, slug: room.slug });
     return NextResponse.json({ room }, { status: 201 });
-  } catch (e: any) {
-    const msg = String(e?.message || e);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
     console.log("[v0] rooms: create error", msg);
     if (msg.includes("DB_URL_MISSING")) {
       return new NextResponse(

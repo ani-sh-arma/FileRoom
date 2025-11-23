@@ -71,8 +71,8 @@ export default function CreateRoomForm() {
         alert("Room created but no slug returned. Please navigate manually.");
         console.log("[v0] createRoom unexpected response:", data);
       }
-    } catch (err: any) {
-      const message = err?.message || "Failed to create room";
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       alert(message);
       console.log("[v0] createRoom error:", message);
     }
