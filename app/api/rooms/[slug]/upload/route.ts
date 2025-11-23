@@ -8,6 +8,7 @@ export async function POST(
   req: Request,
   { params }: { params: { slug: string } }
 ) {
+  params = await params;
   const slug = decodeURIComponent(params.slug);
   const room = await getRoomBySlug(slug);
   if (!room) return new NextResponse("Not found", { status: 404 });

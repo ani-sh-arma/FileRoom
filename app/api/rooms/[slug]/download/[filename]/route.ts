@@ -7,6 +7,7 @@ export async function GET(
   req: Request,
   { params }: { params: { slug: string; filename: string } }
 ) {
+  params = await params;
   const slug = decodeURIComponent(params.slug);
   const filename = decodeURIComponent(params.filename);
 

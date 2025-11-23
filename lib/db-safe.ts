@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { Room } from "../models/room";
 
 type Sql = ReturnType<typeof neon>;
 
@@ -57,15 +58,12 @@ export async function ensureSchema() {
   _schemaReady = true;
 }
 
-export async function findRoomBySlug(slug: string) {
+
+
+export async function findRoomBySlug(slug: string): Promise<Room | null> {
   const s = sql();
-  const rows = await s<{
-    id: number;
-    slug: string;
-    is_private: boolean;
-    password_hash: string | null;
-  }>`
+  const rows = (await s`
     select id, slug, is_private, password_hash from rooms where slug = ${slug} limit 1
-  `;
+  `) as Room[];
   return rows[0] || null;
 }

@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import { sql } from "./db-safe";
 
 const CANDIDATE_ENV_VARS = [
   "DATABASE_URL",
@@ -16,26 +16,13 @@ function resolveDbUrl(): string | null {
   return null;
 }
 
-let _sql: ReturnType<typeof neon> | null = null;
-export function getSql() {
-  const url = resolveDbUrl();
-  if (!url) {
-    // Don't throw at module load time; throw here so callers can catch and return a helpful response
-    throw new Error("DB_URL_MISSING");
-  }
-  if (!_sql) {
-    _sql = neon(url);
-  }
-  return _sql;
-}
-
 let schemaReady: Promise<void> | null = null;
 async function ensureSchema() {
   if (!schemaReady) {
     schemaReady = (async () => {
-      const sql = getSql();
+      const s = sql();
       try {
-        await sql`
+        await s`
           CREATE TABLE IF NOT EXISTS rooms (
             id BIGSERIAL PRIMARY KEY,
             slug TEXT NOT NULL UNIQUE,
@@ -44,7 +31,7 @@ async function ensureSchema() {
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
           )
         `;
-        await sql`
+        await s`
           CREATE TABLE IF NOT EXISTS files (
             id BIGSERIAL PRIMARY KEY,
             room_slug TEXT NOT NULL REFERENCES rooms(slug) ON DELETE CASCADE,
@@ -85,10 +72,8 @@ export type FileRow = {
 
 export async function getRoomBySlug(slug: string): Promise<Room | null> {
   await ensureSchema();
-  const sql = getSql();
-  const rows = await sql<
-    Room[]
-  >`SELECT * FROM rooms WHERE slug = ${slug} LIMIT 1`;
+  const s = sql();
+  const rows = (await s`SELECT * FROM rooms WHERE slug = ${slug} LIMIT 1`) as Room[];
   return rows[0] ?? null;
 }
 
@@ -98,19 +83,19 @@ export async function createRoom(params: {
   password_hash: string | null;
 }): Promise<Room> {
   await ensureSchema();
-  const sql = getSql();
-  const rows = await sql<Room[]>`
+  const s = sql();
+  const rows = (await s`
     INSERT INTO rooms (slug, is_private, password_hash)
     VALUES (${params.slug}, ${params.is_private}, ${params.password_hash})
-    RETURNING *`;
+    RETURNING *`) as Room[];
   return rows[0];
 }
 
 export async function listFiles(slug: string): Promise<FileRow[]> {
   await ensureSchema();
-  const sql = getSql();
-  const rows = await sql<FileRow[]>`
-    SELECT * FROM files WHERE room_slug = ${slug} ORDER BY uploaded_at DESC`;
+  const s = sql();
+  const rows = (await s`
+    SELECT * FROM files WHERE room_slug = ${slug} ORDER BY uploaded_at DESC`) as FileRow[];
   return rows;
 }
 
@@ -122,11 +107,11 @@ export async function addFile(row: {
   content_type: string | null;
 }): Promise<FileRow> {
   await ensureSchema();
-  const sql = getSql();
-  const rows = await sql<FileRow[]>`
+  const s = sql();
+  const rows = (await s`
     INSERT INTO files (room_slug, file_name, blob_url, size, content_type)
     VALUES (${row.room_slug}, ${row.file_name}, ${row.blob_url}, ${row.size}, ${row.content_type})
-    RETURNING *`;
+    RETURNING *`) as FileRow[];
   return rows[0];
 }
 
@@ -135,8 +120,8 @@ export async function getFile(
   file_name: string
 ): Promise<FileRow | null> {
   await ensureSchema();
-  const sql = getSql();
-  const rows = await sql<FileRow[]>`
-    SELECT * FROM files WHERE room_slug = ${room_slug} AND file_name = ${file_name} LIMIT 1`;
+  const s = sql();
+  const rows = (await s`
+    SELECT * FROM files WHERE room_slug = ${room_slug} AND file_name = ${file_name} LIMIT 1`) as FileRow[];
   return rows[0] ?? null;
 }

@@ -6,6 +6,7 @@ export async function POST(
   req: Request,
   { params }: { params: { slug: string } }
 ) {
+  params = await params;
   const slug = decodeURIComponent(params.slug);
   const body = await req.json().catch(() => ({}));
   const password: string = body.password || "";
