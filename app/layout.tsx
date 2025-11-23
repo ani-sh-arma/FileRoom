@@ -10,7 +10,7 @@ const _geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FileRoom",
+  title: "File Room",
   description: "Share files in seconds",
   icons: {
     icon: "/favicon.png",
