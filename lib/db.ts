@@ -1,21 +1,5 @@
 import { sql } from "./db-safe";
 
-const CANDIDATE_ENV_VARS = [
-  "DATABASE_URL",
-  "POSTGRES_URL",
-  "POSTGRES_PRISMA_URL",
-  "POSTGRES_URL_NON_POOLING",
-  "POSTGRES_URL_NO_SSL",
-] as const;
-
-function resolveDbUrl(): string | null {
-  for (const key of CANDIDATE_ENV_VARS) {
-    const val = process.env[key];
-    if (val && String(val).trim().length > 0) return val as string;
-  }
-  return null;
-}
-
 let schemaReady: Promise<void> | null = null;
 async function ensureSchema() {
   if (!schemaReady) {

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "FileRoom",
   description: "Share files in seconds",
   icons: {
-    icon: "favicon.ico",
+    icon: "/favicon.png",
   },
 };
 

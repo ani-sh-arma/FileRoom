@@ -58,8 +58,6 @@ export async function ensureSchema() {
   _schemaReady = true;
 }
 
-
-
 export async function findRoomBySlug(slug: string): Promise<Room | null> {
   const s = sql();
   const rows = (await s`
