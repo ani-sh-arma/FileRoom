@@ -55,7 +55,7 @@ async function ensureSchema() {
             uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
           )
         `
-      } catch (e: any) {
+      } catch (e: Error) {
         // Surface a stable error code we can catch in routes
         console.log("[v0] ensureSchema error:", e?.message || e)
         throw new Error(`SCHEMA_INIT_FAILED: ${e?.message || e}`)
