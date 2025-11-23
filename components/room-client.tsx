@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/seperator";
+import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type FileRow = {
   id: number;
@@ -65,6 +67,8 @@ export default function RoomClient(props: {
   const { slug, isPrivate, authed } = props;
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState("");
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const { data, error, isLoading, mutate } = useSWR<{ files: FileRow[] }>(
     authed || !isPrivate ? `/api/rooms/${slug}/files` : null,
@@ -83,15 +87,41 @@ export default function RoomClient(props: {
   const onUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
-    await upload({ file });
-    setFile(null);
-    await mutate();
+    try {
+      await upload({ file });
+      toast({
+        title: "File Uploaded",
+        description: `${file.name} has been uploaded successfully.`,
+      });
+      setFile(null);
+      await mutate();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: message,
+      });
+    }
   };
 
   const onAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    await authenticate({ password });
-    window.location.reload();
+    try {
+      await authenticate({ password });
+      toast({
+        title: "Access Granted",
+        description: "You can now view the files.",
+      });
+      window.location.reload();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast({
+        variant: "destructive",
+        title: "Authentication Failed",
+        description: message,
+      });
+    }
   };
 
   if (isPrivate && !authed) {
@@ -127,12 +157,19 @@ export default function RoomClient(props: {
           <CardTitle>Upload a file</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={onUpload} className="flex items-center gap-3">
+          <form
+            onSubmit={onUpload}
+            className={`flex ${isMobile ? "flex-col" : "items-center"} gap-3`}
+          >
             <Input
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
-            <Button type="submit" disabled={!file || uploading}>
+            <Button
+              type="submit"
+              disabled={!file || uploading}
+              className={isMobile ? "w-full" : ""}
+            >
               {uploading ? "Uploading..." : "Upload"}
             </Button>
           </form>

@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 
 async function createRoomReq(
   url: string,
@@ -46,6 +47,7 @@ export default function CreateRoomForm() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
   const { trigger, isMutating } = useSWRMutation("/api/rooms", createRoomReq);
+  const { toast } = useToast();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,9 +57,22 @@ export default function CreateRoomForm() {
       .replace(/[^a-z0-9-]/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
-    if (!cleanSlug) return alert("Please enter a valid slug");
-    if (isPrivate && password.length < 4)
-      return alert("Password must be at least 4 characters");
+    if (!cleanSlug) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Slug",
+        description: "Please enter a valid slug.",
+      });
+      return;
+    }
+    if (isPrivate && password.length < 4) {
+      toast({
+        variant: "destructive",
+        title: "Weak Password",
+        description: "Password must be at least 4 characters.",
+      });
+      return;
+    }
 
     try {
       const data = await trigger({
@@ -66,14 +81,26 @@ export default function CreateRoomForm() {
         password: isPrivate ? password : undefined,
       });
       if (data?.room?.slug) {
+        toast({
+          title: "Room Created!",
+          description: "Redirecting you to your new file room...",
+        });
         window.location.href = `/${data.room.slug}`;
       } else {
-        alert("Room created but no slug returned. Please navigate manually.");
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Room created but no slug returned.",
+        });
         console.log("[v0] createRoom unexpected response:", data);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      alert(message);
+      toast({
+        variant: "destructive",
+        title: "Failed to create room",
+        description: message,
+      });
       console.log("[v0] createRoom error:", message);
     }
   };
