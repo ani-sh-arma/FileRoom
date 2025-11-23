@@ -5,7 +5,6 @@ import type React from "react";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,7 +14,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/seperator";
 
 type FileRow = {
   id: number;

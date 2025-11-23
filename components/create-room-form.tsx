@@ -3,7 +3,6 @@
 import type React from "react";
 import { useState } from "react";
 import useSWRMutation from "swr/mutation";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,13 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@radix-ui/react-label";
-import { Switch } from "@radix-ui/react-switch";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-// import { Input } from "@/components/ui/input";
-
-// import { Label } from "@/components/ui/label";
-// import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 async function createRoomReq(
   url: string,

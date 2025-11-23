@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="min-h-dvh flex flex-col items-center justify-center p-6">
       <section className="w-full max-w-2xl text-center space-y-6">
         <h1 className="text-3xl md:text-4xl font-semibold text-balance">
-          Share files in seconds
+          Share files in seconds with FileRoom
         </h1>
         <p className="text-muted-foreground text-pretty">
           Create a dedicated page like {'"'}your-site.com/private-page{'"'}{" "}

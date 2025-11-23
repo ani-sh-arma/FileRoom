@@ -10,6 +10,7 @@ export default async function RoomPage({
 }: {
   params: { slug: string };
 }) {
+  params = await params;
   const slug = decodeURIComponent(params.slug);
   const room = await getRoomBySlug(slug);
   if (!room) return notFound();
