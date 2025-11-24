@@ -28,5 +28,21 @@ export async function GET(
   const file = await getFile(slug, filename);
   if (!file) return new NextResponse("File not found", { status: 404 });
 
-  return NextResponse.redirect(file.blob_url);
+  const response = await fetch(file.blob_url);
+  if (!response.ok) {
+    return new NextResponse("Failed to fetch file", { status: 502 });
+  }
+
+  const headers = new Headers(response.headers);
+  headers.set(
+    "Content-Disposition",
+    `attachment; filename="${encodeURIComponent(file.file_name)}"`
+  );
+  headers.set("Content-Type", file.content_type || "application/octet-stream");
+  headers.set("Content-Length", file.size.toString());
+
+  return new NextResponse(response.body, {
+    status: 200,
+    headers,
+  });
 }

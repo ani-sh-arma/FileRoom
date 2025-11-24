@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/seperator";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Download, Trash2 } from "lucide-react";
 
 type FileRow = {
   id: number;
@@ -124,6 +125,28 @@ export default function RoomClient(props: {
     }
   };
 
+  const onDeleteFile = async (fileId: number) => {
+    if (!confirm("Are you sure you want to delete this file?")) return;
+    try {
+      const res = await fetch(`/api/rooms/${slug}/files/${fileId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast({
+        title: "File Deleted",
+        description: "The file has been deleted successfully.",
+      });
+      await mutate();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast({
+        variant: "destructive",
+        title: "Delete Failed",
+        description: message,
+      });
+    }
+  };
+
   if (isPrivate && !authed) {
     return (
       <Card className="max-w-md w-full">
@@ -194,19 +217,44 @@ export default function RoomClient(props: {
                     className="flex items-center justify-between gap-3"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium">{f.file_name}</p>
+                      <p className="truncate font-medium">
+                        <a
+                          href={f.blob_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline"
+                        >
+                          {f.file_name}
+                        </a>
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         {(f.size / 1024).toFixed(1)} KB
                       </p>
                     </div>
-                    <a
-                      href={f.blob_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline"
-                    >
-                      Open
-                    </a>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        asChild
+                        title="Download"
+                      >
+                        <a
+                          href={`/api/rooms/${slug}/download/${encodeURIComponent(
+                            f.file_name
+                          )}`}
+                        >
+                          <Download className="h-4 w-4" />
+                        </a>
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => onDeleteFile(f.id)}
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </li>
                 ))
               ) : (

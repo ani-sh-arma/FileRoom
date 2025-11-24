@@ -57,7 +57,8 @@ export type FileRow = {
 export async function getRoomBySlug(slug: string): Promise<Room | null> {
   await ensureSchema();
   const s = sql();
-  const rows = (await s`SELECT * FROM rooms WHERE slug = ${slug} LIMIT 1`) as Room[];
+  const rows =
+    (await s`SELECT * FROM rooms WHERE slug = ${slug} LIMIT 1`) as Room[];
   return rows[0] ?? null;
 }
 
@@ -108,4 +109,15 @@ export async function getFile(
   const rows = (await s`
     SELECT * FROM files WHERE room_slug = ${room_slug} AND file_name = ${file_name} LIMIT 1`) as FileRow[];
   return rows[0] ?? null;
+}
+
+export async function deleteFile(
+  room_slug: string,
+  file_id: number
+): Promise<void> {
+  await ensureSchema();
+  const s = sql();
+  await s`
+    DELETE FROM files WHERE room_slug = ${room_slug} AND id = ${file_id}
+  `;
 }
