@@ -4,6 +4,7 @@ import { getRoomBySlug } from "@/lib/db";
 import { getAuthCookieName, verifyRoomToken } from "@/lib/auth";
 import RoomClient from "@/components/room-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default async function RoomPage({
   params,
@@ -30,6 +31,9 @@ export default async function RoomPage({
 
   return (
     <main className="min-h-dvh p-6">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
       <div className="max-w-3xl mx-auto grid gap-6">
         <Card>
           <CardHeader>
